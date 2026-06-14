@@ -1,0 +1,23 @@
+# PostgreSQL с автоматической загрузкой database/init.sql при первом запуске
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: trafficflow-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: trafficflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - trafficflow_pgdata:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d trafficflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  trafficflow_pgdata:
